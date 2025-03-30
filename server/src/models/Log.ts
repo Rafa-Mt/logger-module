@@ -6,7 +6,7 @@ const methods = ["GET", "POST", "PUT", "DELETE"] as const;
 export type LogType = typeof types[number];
 export type HttpMethod = typeof methods[number];
 
-export interface LogParams {
+export interface Log {
     ip: string,
     type: LogType,
     method: HttpMethod,
@@ -72,7 +72,7 @@ export default class LogManager {
         return LogManager.createModel(this.db)
     }
     
-    public async insertOne({ip, type, method, endpoint, body, params}: LogParams) {
+    public async insertOne({ip, type, method, endpoint, body, params}: Log) {
         const typeId = LogManager.types.findIndex((logType) => logType === type) +1
         const methodId = LogManager.methods.findIndex((logMethod) => logMethod === method) +1
         await this.db.run(
@@ -81,7 +81,7 @@ export default class LogManager {
         )
     }
 
-    public async insertMany(logs: LogParams[]) {
+    public async insertMany(logs: Log[]) {
         const statement = await this.db
             .prepare('INSERT INTO log (ip, endpoint, type_id, method_id, body, params) VALUES (?, ?, ?, ?, ?, ?);')
         
@@ -93,7 +93,7 @@ export default class LogManager {
     }
 
     public async getAll() {
-        return this.db.all<LogParams[]>(
+        return this.db.all<Log[]>(
             // "SELECT * FROM log"
             `
             SELECT 
