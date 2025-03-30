@@ -77,7 +77,7 @@ export default class LogManager {
         const methodId = LogManager.methods.findIndex((logMethod) => logMethod === method) +1
         await this.db.run(
             'INSERT INTO log (ip, endpoint, type_id, method_id, body, params) VALUES (?, ?, ?, ?, ?, ?);',
-            ip, endpoint, typeId, methodId, body ? JSON.stringify(body) : "{}", params ? JSON.stringify(params) : "{}"
+            ip, endpoint, typeId, methodId, body ? JSON.stringify(body) : null, params ? JSON.stringify(params) : null
         )
     }
 
@@ -88,7 +88,7 @@ export default class LogManager {
         for (const log of logs) {
             const typeId = LogManager.types.findIndex((logType) => logType === log.type) +1
             const methodId = LogManager.methods.findIndex((logMethod) => logMethod === log.method) +1
-            await statement.run(log.ip, log.endpoint, typeId, methodId, log.body ? JSON.stringify(log.body) : "{}", log.params ? JSON.stringify(log.params) : {})
+            await statement.run(log.ip, log.endpoint, typeId, methodId, log.body ? JSON.stringify(log.body) : null, log.params ? JSON.stringify(log.params) : null)
         }
     }
 
