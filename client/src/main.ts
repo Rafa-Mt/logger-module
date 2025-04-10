@@ -16,4 +16,3 @@ app.use(PrimeVue, {
 
 app.use(router);
 app.mount('#app');
-app.component('Button-f', Button);
