@@ -1,19 +1,7 @@
 import { Database } from "sqlite";
+import { Log, LogType, HttpMethod } from "@common/types";
+import { types, methods } from "@common/consts";
 
-const types = ['DEBUG', 'ERROR', 'INFO', 'WARNING', 'ROUTE'] as const;
-const methods = ["GET", "POST", "PUT", "DELETE"] as const;
-
-export type LogType = typeof types[number];
-export type HttpMethod = typeof methods[number];
-
-export interface Log {
-    ip: string,
-    type: LogType,
-    method: HttpMethod,
-    endpoint: string,
-    body?: Record<string, any>,
-    params?: Record<string, string | number>
-}
 
 export default class LogManager {
     static types = types
