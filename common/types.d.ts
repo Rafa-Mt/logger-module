@@ -5,9 +5,15 @@ export type HttpMethod = typeof methods[number];
 
 export interface RouteLog {
     ip: string,
-    type: LogType,
     method: HttpMethod,
     endpoint: string,
     body?: Record<string, any>,
     params?: Record<string, string | number>
+    timestamp: Date
+}
+
+export interface CustomLog {
+    method: HttpMethod,
+    message: string,
+    timestamp: Date
 }
