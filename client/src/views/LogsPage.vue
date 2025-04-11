@@ -1,81 +1,186 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
+import Dropdown from 'primevue/dropdown';
 import {CustomLog, RouteLog} from '@/../../common/types'; 
 
 
 // Datos de ejemplo
+type LogType = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
 const customLogs = ref<CustomLog[]>([
   { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
   { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
   { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
   { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
+  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
+  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
+  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
+  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
+  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
+  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
+  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
+  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
+  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
+  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
+  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
+  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
 ]);
+
 
 const routeLogs = ref<RouteLog[]>([
   { ip: '192.168.1.1', method: 'GET', endpoint: '/api/users', timestamp: new Date() },
   { ip: '10.0.0.5', method: 'POST', endpoint: '/api/auth/login', body: { username: 'admin', password: '12345' },params: { page: 1, limit: 10 }, timestamp: new Date(Date.now() - 3600000) },
-  { ip: '172.16.0.3', method: 'GET', endpoint: '/api/products', params: { page: 1, limit: 10 }, timestamp: new Date(Date.now() - 7200000) },
-  { ip: '192.168.1.15', method: 'DELETE', endpoint: '/api/users/5', timestamp: new Date(Date.now() - 10800000) },
 ]);
 
 const searchQuery = ref('');
-const currentPage = ref(1);
+const currentPage = ref(0);
 const rowsPerPage = ref(10);
+const activeTabIndex = ref(0);
 
 // Filtrado y paginación para Custom Logs
 const filteredCustomLogs = computed(() => {
-  return customLogs.value.filter(log => 
-    log.message.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    log.type.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+  return customLogs.value.filter(log => {
+    const matchesSearchQuery = log.message.toLowerCase().includes(customSearchText.value.toLowerCase()) ||
+      log.type.toLowerCase().includes(customSearchText.value.toLowerCase());
+
+    const matchesLogType = !selectedLogType.value || log.type === selectedLogType.value;
+
+    return matchesSearchQuery && matchesLogType;
+  });
 });
 
 const paginatedCustomLogs = computed(() => {
-  const start = (currentPage.value - 1) * rowsPerPage.value;
-  return filteredCustomLogs.value.slice(start, start + rowsPerPage.value);
+  return filteredCustomLogs.value;
 });
 
-// Filtrado y paginación para Route Logs
 const filteredRouteLogs = computed(() => {
-  const x = routeLogs.value.filter(log => 
-    log.ip.includes(searchQuery.value) ||
-    log.method.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    log.endpoint.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-  console.log(x);
-  return x;
+  return routeLogs.value.filter(log => {
+    const matchesSearchQuery =
+      log.ip.includes(routeSearchText.value) ||
+      log.method.toLowerCase().includes(routeSearchText.value.toLowerCase()) ||
+      log.endpoint.toLowerCase().includes(routeSearchText.value.toLowerCase());
 
+    const matchesEndpoint =
+      !selectedEndpoint.value || log.endpoint === selectedEndpoint.value;
+
+    const matchesMethod =
+      !selectedMethod.value || log.method === selectedMethod.value;
+
+    return matchesSearchQuery && matchesEndpoint && matchesMethod;
+  });
 });
 
 const paginatedRouteLogs = computed(() => {
-  const start = (currentPage.value - 1) * rowsPerPage.value;
-  return filteredRouteLogs.value.slice(start, start + rowsPerPage.value);
+  return filteredRouteLogs.value;
 });
 
 // Cambiar pestaña reinicia la paginación
-const onTabChange = () => {
-  currentPage.value = 1;
+const onTabChange = (event: { index: number }) => {
+  activeTabIndex.value = event.index;
+  currentPage.value = 0;
+  searchQuery.value = '';
+  customSearchText.value = '';
+  routeSearchText.value = '';
+  selectedLogType.value = null;
+  selectedMethod.value = null;
+  selectedEndpoint.value = null;
+
 };
+
+const endpoints = computed(() => {
+  const uniqueEndpoints = new Set(routeLogs.value.map(log => log.endpoint));
+  return Array.from(uniqueEndpoints);
+});
+
+// Filtros para Custom Logs
+const customSearchText = ref('');
+const selectedLogType = ref<LogType | null>(null);
+const logTypes = ref<LogType[]>(['DEBUG', 'ERROR', 'INFO', 'WARN']);
+
+// Filtros para Route Logs
+const routeSearchText = ref('');
+const selectedMethod = ref<HttpMethod | null>(null);
+const selectedEndpoint = ref<string | null>(null);
+const methods = ref<HttpMethod[]>(['GET', 'POST', 'PUT', 'DELETE']);
+
+
 </script>
 
 <template>
   <div class="logs-container">
     <h1>Logs del Sistema</h1>
     
-    <div class="search-container">
-      <span class="p-input-icon-left">
-        <i class="pi pi-search" />
-        <InputText 
-          v-model="searchQuery" 
-          placeholder="Buscar logs..." 
-          @input="currentPage "
+    <div class="filters-container">
+      <div v-if="activeTabIndex === 1" class="filter-group">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search" />
+          <InputText 
+            v-model="customSearchText" 
+            placeholder="Buscar por mensaje..." 
+            @input="currentPage = 0"
+          />
+        </span>
+        
+        <Dropdown 
+          v-model="selectedLogType" 
+          :options="logTypes" 
+          placeholder="Filtrar por tipo"
+          showClear
+          @change="currentPage = 0"
+          class="filter-dropdown"
         />
-      </span>
+      </div>
+      
+      <!-- Filtros para Route Logs (visible solo en la pestaña Route) -->
+      <div v-else class="filter-group">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search" />
+          <InputText 
+            v-model="routeSearchText" 
+            placeholder="Buscar por IP..." 
+            @input="currentPage = 0"
+          />
+        </span>
+        
+        <Dropdown 
+          v-model="selectedMethod" 
+          :options="methods" 
+          placeholder="Filtrar por método"
+          showClear
+          @change="currentPage = 0"
+          class="filter-dropdown"
+        />
+        
+        <Dropdown 
+          v-model="selectedEndpoint" 
+          :options="endpoints" 
+          placeholder="Filtrar por endpoint"
+          showClear
+          filter
+          @change="currentPage = 0"
+          class="filter-dropdown"
+        />
+      </div>
     </div>
 
     <TabView @tab-change="onTabChange">
@@ -99,23 +204,20 @@ const onTabChange = () => {
           </Column>
 
           <Column field="endpoint" header="Endpoint" />
-          <Column field="endpoint" header="Endpoint" />
-          <Column field="endpoint" header="Endpoint" />
-          <Column field="endpoint" header="Endpoint" />
 
-          <Column header="Body" v-if="false">
+          <Column header="Body" field="body">
             <template #body="{data}">
               <pre v-if="data.body">{{ JSON.stringify(data.body, null, 2) }}</pre>
               <span v-else>-</span>
             </template>
           </Column>
-          <Column header="Params">
+          <Column header="Params" field="params">
             <template #body="{data}">
               <pre v-if="data.params">{{ JSON.stringify(data.params, null, 2) }}</pre>
               <span v-else>-</span>
             </template>
           </Column>
-          <Column field="timestamp" header="Fecha/Hora" :sortable="true">
+          <Column field="timestamp" header="Fecha/Hora">
             <template #body="{data}">
               {{ data.timestamp.toLocaleString() }}
             </template>
@@ -143,24 +245,41 @@ const onTabChange = () => {
               {{ data.timestamp.toLocaleString() }}
             </template>
           </Column>
+          
         </DataTable>
       </TabPanel>
     </TabView>
   </div>
 </template>
 
+
 <style scoped>
 .logs-container {
   padding: 1rem;
 }
 
-.search-container {
+.filters-container {
   margin-bottom: 1rem;
-  max-width: 400px;
 }
 
-/* Estilos para los badges de tipo de log */
-.log-badge {
+.filter-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-dropdown {
+  min-width: 200px;
+}
+
+.p-input-icon-left {
+  flex: 1;
+  min-width: 250px;
+}
+
+/* Estilos para los badges */
+.log-badge, .method-badge {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-weight: bold;
@@ -168,73 +287,41 @@ const onTabChange = () => {
   text-transform: uppercase;
 }
 
-.log-info {
-  background-color: #2196F3;
-  color: white;
-}
+/* Colores para tipos de log */
+.log-info { background-color: #2196F3; color: white; }
+.log-warn { background-color: #FFC107; color: black; }
+.log-error { background-color: #F44336; color: white; }
+.log-debug { background-color: #9E9E9E; color: white; }
 
-.log-warn {
-  background-color: #FFC107;
-  color: black;
-}
+/* Colores para métodos HTTP */
+.method-get { background-color: #4CAF50; color: white; }
+.method-post { background-color: #2196F3; color: white; }
+.method-put { background-color: #FF9800; color: white; }
+.method-delete { background-color: #F44336; color: white; }
 
-.log-error {
-  background-color: #F44336;
-  color: white;
-}
-
-.log-debug {
-  background-color: #9E9E9E;
-  color: white;
-}
-
-/* Estilos para los badges de método HTTP */
-.method-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: bold;
+/* Estilo para JSON */
+.json-pre {
+  margin: 0;
   font-size: 0.8rem;
+  white-space: pre-wrap;
+  background: #f5f5f5;
+  padding: 0.5rem;
+  border-radius: 4px;
+  max-width: 300px;
+  max-height: 150px;
+  overflow: auto;
 }
 
-.method-get {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.method-post {
-  background-color: #2196F3;
-  color: white;
-}
-
-.method-put {
-  background-color: #FF9800;
-  color: white;
-}
-
-.method-delete {
-  background-color: #F44336;
-  color: white;
-}
-
-.method-patch {
-  background-color: #9C27B0;
-  color: white;
-}
-
-/* Mejoras para la tabla */
-:deep(.p-datatable) {
-  font-size: 0.9rem;
-}
-
-:deep(.p-datatable .p-column-header-content) {
-  font-weight: bold;
-}
-
-/* Ocultar columnas Body y Params por defecto */
-:deep(.p-datatable .p-datatable-thead > tr > th:nth-child(4)),
-:deep(.p-datatable .p-datatable-tbody > tr > td:nth-child(4)),
-:deep(.p-datatable .p-datatable-thead > tr > th:nth-child(5)),
-:deep(.p-datatable .p-datatable-tbody > tr > td:nth-child(5)) {
-  display: none;
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .p-input-icon-left,
+  .filter-dropdown {
+    width: 100%;
+  }
 }
 </style>
