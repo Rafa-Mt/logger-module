@@ -37,21 +37,19 @@ defineProps({
 <style scoped>
 .card-title {
   text-align: left;
-  font-size: 1.5rem;
+  font-size: 1rem;
   color: rgb(236, 219, 219);
 }
 
 .card-stat {
-  display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  font-size: 4rem;
+  font-size: 2rem;
   font-weight: bold;
 }
 
 .custom-card {
   background-color: #2c3e50;
-  border-radius: 8px; /* Opcional: redondear las esquinas */
+  border-radius: 8px; 
 }
 </style>
