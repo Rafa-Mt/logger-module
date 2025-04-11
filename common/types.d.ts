@@ -13,7 +13,7 @@ export interface RouteLog {
 }
 
 export interface CustomLog {
-    method: HttpMethod,
+    type: LogType,
     message: string,
     timestamp: Date
 }
