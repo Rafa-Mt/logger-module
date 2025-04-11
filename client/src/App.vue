@@ -8,6 +8,10 @@
         <router-link to="/logs" class="nav-link" active-class="active-link">
           <i class="pi pi-list"></i> Logs
         </router-link>
+        <div class="nav-link" active-class="active-link">
+          <ExportMenu/>
+        </div>
+        
       </div>
     </nav>
     <main class="main-content">
@@ -17,6 +21,14 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue';
+import ExportMenu from '@/components/ExportMenu.vue';
+
+export default defineComponent({
+  components:
+  { ExportMenu },
+})
+
 </script>
 
 <style scoped>
@@ -45,6 +57,7 @@
 }
 
 .nav-link {
+  cursor: pointer;
   color: #ecf0f1;
   text-decoration: none;
   font-size: 1.1rem;

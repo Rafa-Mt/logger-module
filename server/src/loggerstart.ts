@@ -86,7 +86,7 @@ export class LoggerServer {
                 platform: process.platform,
                 arch: process.arch
             });
-        }, 2000)
+        }, 1000)
 
         // Inicia el servidor de logs (puerto 4586)
         const logPort = 4586;
