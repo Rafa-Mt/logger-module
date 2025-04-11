@@ -27,14 +27,14 @@ export class LoggerServer {
         const frontPort = 4596;
 
         // Sirve los archivos estáticos del front
-        frontApp.use(express.static(path.join(__dirname, '../../static/front')));
+        frontApp.use(express.static(path.join(path.dirname(""), '../../client/dist/index.html')));
 
         // Inicia el servidor del front
         frontApp.listen(frontPort, () => {
             console.log(`Front disponible en http://localhost:${frontPort}`);
         });
 
-        this.logs = await LogManager.create
+        this.logs = await LogManager.create()
         // Configura la base de datos y el modelo de logs
         this.db = await openDatabase('./static/db.sqlite');
         await LogManager.createModel(this.db);
