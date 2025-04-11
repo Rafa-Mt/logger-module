@@ -129,11 +129,11 @@ export class LoggerServer {
     /**
      * Registra un log de tipo DEBUG usando logCustom
      */
-    public async debug(log: { ip: string; endpoint: string; method: string; body?: any; params?: any }) {
-        await this.logs.logCustom({ type: 'DEBUG', message: JSON.stringify(log) });
-        console.log('DEBUG log registrado:', log);
+    public async debug({message}: { message: string }) {
+        await this.logs.logCustom({ type: 'DEBUG', message: message });
+        console.log('DEBUG log registrado:', message);
         // Envía el evento al front
-        this.io.emit('log', { ...log, type: 'DEBUG' });
+        this.io.emit('log', { message, type: 'DEBUG' });
     }
 
     /**

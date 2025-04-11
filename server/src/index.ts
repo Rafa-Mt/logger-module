@@ -17,6 +17,7 @@ app.get('/RouteTest', (req, res) => {
 });
 
 app.get('/CustomTest', (req, res) => {
+  loggerServer.debug({message:"Probando LoggerServer"});
   res.send("Hola, probando LoggerServer!");
 });
 
