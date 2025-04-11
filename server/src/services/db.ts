@@ -1,6 +1,6 @@
 import sqlite3 from "sqlite3";
 import { open, Database } from 'sqlite'
-import { readdir, opendir, writeFile, readFile, copyFile } from 'node:fs/promises'
+import { opendir, copyFile, rm } from 'node:fs/promises'
 
 export const openDatabase = (filename: string): Promise<Database<sqlite3.Database, sqlite3.Statement>> => {
     return open({
@@ -24,19 +24,8 @@ export const createSnapshot = async () => {
 }
 
 export const loadSnapshot = async (name: string) => {
-    const db = await openDatabase('./static/db.sqlite')
-    const snapshot = await openSnapshot(name)
-    const tables = await snapshot.all('SELECT name FROM sqlite_master WHERE type="table"')
-    for (const table of tables) {
-        const rows = await snapshot.all(`SELECT * FROM ${table.name}`)
-        for (const row of rows) {
-            const columns = Object.keys(row).map((col) => `"${col}"`).join(', ')
-            const values = Object.values(row).map((val) => `"${val}"`).join(', ')
-            await db.run(`INSERT INTO ${table.name} (${columns}) VALUES (${values})`)
-        }
-    }
-    await db.close()
-    await snapshot.close()
+    await rm('./static/db.sqlite');
+    await copyFile(`./static/snapshots/${name}`, './static/db.sqlite')
 }
 
 export const getSnapshots = async () => {
