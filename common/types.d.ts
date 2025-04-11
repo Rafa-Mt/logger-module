@@ -3,7 +3,7 @@ import { types, methods } from '@common/consts';
 export type LogType = typeof types[number];
 export type HttpMethod = typeof methods[number];
 
-export interface Log {
+export interface RouteLog {
     ip: string,
     type: LogType,
     method: HttpMethod,

@@ -1,5 +1,5 @@
 import { Database } from "sqlite";
-import { Log, LogType, HttpMethod } from "@common/types";
+import { RouteLog, LogType, HttpMethod } from "@common/types";
 import { types, methods } from "@common/consts";
 
 
@@ -60,7 +60,7 @@ export default class LogManager {
         return LogManager.createModel(this.db)
     }
     
-    public async insertOne({ip, type, method, endpoint, body, params}: Log) {
+    public async insertOne({ip, type, method, endpoint, body, params}: RouteLog) {
         const typeId = LogManager.types.findIndex((logType) => logType === type) +1
         const methodId = LogManager.methods.findIndex((logMethod) => logMethod === method) +1
         await this.db.run(
@@ -69,7 +69,7 @@ export default class LogManager {
         )
     }
 
-    public async insertMany(logs: Log[]) {
+    public async insertMany(logs: RouteLog[]) {
         const statement = await this.db
             .prepare('INSERT INTO log (ip, endpoint, type_id, method_id, body, params) VALUES (?, ?, ?, ?, ?, ?);')
         
@@ -81,7 +81,7 @@ export default class LogManager {
     }
 
     public async getAll() {
-        return this.db.all<Log[]>(
+        return this.db.all<RouteLog[]>(
             // "SELECT * FROM log"
             `
             SELECT 
