@@ -2,15 +2,15 @@
 import CarouselStats from '@/components/HomeComponents/CarouselStats.vue';
 import RecentLogs from '@/components/HomeComponents/RecentLogs.vue';
 import ChartCard from '@/components/HomeComponents/CustomChart.vue';
+import { ref } from 'vue';
+import { socket } from '@/socket';
 
-const stats = [
-  { title: 'Stat 1', stat: 100 },
-  { title: 'Stat 2', stat: 200 },
-  { title: 'Stat 3', stat: 300 },
-  { title: 'Stat 4', stat: 400 },
-  { title: 'Stat 5', stat: 500 },
-  { title: 'Stat 6', stat: 600 },
-];
+const stats = ref<{title: string, stat: unknown}[]>([]);
+
+socket.on('stats', (data) => {
+  stats.value = Object.entries(data).map(([title, stat]) => ({ title, stat }));
+  console.log('Received stats:', stats.value);
+}); 
 
 const mockLogs = [
   {

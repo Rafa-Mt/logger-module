@@ -5,9 +5,10 @@ import http from 'http';
 import path from 'path';
 import { Server as SocketIOServer } from 'socket.io';
 
-import {CustomLog, RouteLog,HttpMethod} from '@/../../common/types.d'; 
+import {CustomLog, RouteLog, HttpMethod} from '@/../../common/types.d'; 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { freemem } from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,11 +45,12 @@ export class LoggerServer {
         // Usa el método de fábrica para instanciar LogManager
 
         // Configura Socket.IO
-        this.io = new SocketIOServer(this.server);
+        this.io = new SocketIOServer(this.server, { cors: { origin: '*' } });
         this.io.on('connection', (socket) => {
             console.log('Cliente conectado al front');
         });
 
+        this.logs.attatchSocket(this.io);
         // Endpoint para obtener logs (opcional)
         this.app.get('/logs', async (req, res) => {
             // Se pueden unir tanto los logs de rutas como los custom si se desea
@@ -56,6 +58,33 @@ export class LoggerServer {
             const customLogs = await this.logs.getAllCustomLogs();
             res.json({ routeLogs, customLogs });
         });
+
+        this.app.get('/logs/route', async (req, res) => {
+            const routeLogs = await this.logs.getAllRouteLogs();
+            res.json({ routeLogs });
+        });
+
+        this.app.get('/logs/custom', async (req, res) => {
+            const customLogs = await this.logs.getAllCustomLogs();
+            res.json({ customLogs });
+        });
+
+        this.app.get("/chart", async (req, res) => {    
+            const values = await this.logs.groupByType();
+            res.json(values);
+        });
+
+        setInterval(() => {
+            const memoryUsage = process.memoryUsage();
+            const cpuUsage = process.cpuUsage();
+            this.io.emit('stats', {
+                uptime: `${Math.floor(process.uptime() / 60)}:${Math.floor(process.uptime() % 60).toString().padStart(2, '0')}`,
+                memoryUsage: `${((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100).toFixed(2)}%`,
+                cpuUsage: `${((cpuUsage.user + cpuUsage.system) / (process.uptime() * 1e6) * 100).toFixed(2)}%`,
+                platform: process.platform,
+                arch: process.arch
+            });
+        }, 2000)
 
         // Inicia el servidor de logs (puerto 4586)
         const logPort = 4586;

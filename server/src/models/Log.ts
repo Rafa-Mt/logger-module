@@ -2,6 +2,7 @@ import { Database } from "sqlite";
 import { RouteLog, LogType, HttpMethod } from "@common/types.d";
 import { types, methods } from "@common/consts";
 import { openDatabase, createSnapshot, loadSnapshot } from "@/services/db";
+import { Server as SocketIOServer } from "socket.io";
 
 let selected_db: Database | null = null;
 
@@ -10,6 +11,7 @@ export default class LogManager {
     static types = types
     static methods = methods
     private db: Database
+    private io?: SocketIOServer
 
     public static async createModel(db: Database) {
         await db.run(`
@@ -83,6 +85,10 @@ export default class LogManager {
     public async createModel() {
         return LogManager.createModel(this.db)
     }
+
+    public attatchSocket(io: SocketIOServer) {
+        this.io = io
+    }
     
     public async logRoute({ip, method, endpoint, body, params}: RouteLog) {
         const methodId = LogManager.methods.findIndex((logMethod) => logMethod === method) +1
@@ -90,6 +96,8 @@ export default class LogManager {
             'INSERT INTO route_log (ip, endpoint, method_id, body, params) VALUES (?, ?, ?, ?, ?);',
             ip, endpoint, methodId, body ? JSON.stringify(body) : null, params ? JSON.stringify(params) : null
         )
+        if (this.io)
+            this.io.emit('log-route')
     }
 
     public async logCustom({type, message}: {type: LogType, message: string}) {
@@ -98,6 +106,8 @@ export default class LogManager {
             'INSERT INTO custom_log (type_id, message) VALUES (?, ?);',
             typeId, message
         )
+        if (this.io)
+            this.io.emit('log-custom')
     }
 
     public async getAllRouteLogs() {
@@ -125,5 +135,20 @@ export default class LogManager {
             FROM custom_log as log
                 INNER JOIN log_type ON log.type_id = log_type.id
         `);
+    }
+
+    public async groupByType() {
+        const response = await this.db.all<{ type: string, count: number}[]>(`
+            SELECT
+                log_type.name as type,
+                COUNT(log.id) as count
+            FROM custom_log as log
+                INNER JOIN log_type ON log.type_id = log_type.id
+            GROUP BY log_type.name
+        `);
+
+        const types = response.map(item => item.type);
+        const counts = response.map(item => item.count);
+        return { types, counts };
     }
 }
