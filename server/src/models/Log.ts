@@ -47,7 +47,8 @@ export default class LogManager {
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (method_id) REFERENCES http_method (id)
             );
-
+        `);
+        await db.run(`
             CREATE TABLE IF NOT EXISTS custom_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 type_id INTEGER NOT NULL,
@@ -108,7 +109,7 @@ export default class LogManager {
                 log.body,
                 log.params,
                 http_method.name as method
-            FROM route_log
+            FROM route_log AS log
                 INNER JOIN http_method ON log.method_id = http_method.id
         `);
     }
