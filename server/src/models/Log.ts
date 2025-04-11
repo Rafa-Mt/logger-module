@@ -115,4 +115,17 @@ export default class LogManager {
                 INNER JOIN http_method ON log.method_id = http_method.id
         `);
     }
+
+
+    public async getAllCustomLogs() {
+        return this.db.all<LogType[]>(`
+            SELECT
+                log.id,
+                log.message,
+                log.timestamp,
+                log_type.name as type   
+            FROM custom_log as log
+                INNER JOIN log_type ON log.type_id = log_type.id
+        `);
+    }
 }
