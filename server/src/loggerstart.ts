@@ -6,6 +6,11 @@ import path from 'path';
 import { Server as SocketIOServer } from 'socket.io';
 
 import {CustomLog, RouteLog,HttpMethod} from '@/../../common/types.d'; 
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export class LoggerServer {
     private db: any;
@@ -26,9 +31,7 @@ export class LoggerServer {
         const frontApp = express();
         const frontPort = 4596;
 
-        // Sirve los archivos estáticos del front
-        frontApp.use(express.static(path.join(path.dirname(""), '../../client/dist/index.html')));
-
+        frontApp.use(express.static(path.join(__dirname, '../../client/dist')));
         // Inicia el servidor del front
         frontApp.listen(frontPort, () => {
             console.log(`Front disponible en http://localhost:${frontPort}`);

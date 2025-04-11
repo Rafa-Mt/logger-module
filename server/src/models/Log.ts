@@ -13,10 +13,7 @@ export default class LogManager {
 
     public static async createModel(db: Database) {
         await db.run(`
-            DROP TABLE IF EXISTS route_log;
-            DROP TABLE IF EXISTS custom_log;
-            DROP TABLE IF EXISTS log_type;
-            DROP TABLE IF EXISTS http_method;
+
 
             CREATE TABLE IF NOT EXISTS log_type (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
