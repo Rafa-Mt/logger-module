@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CarouselStats from '@/components/HomeComponents/CarouselStats.vue';
 import RecentLogs from '@/components/HomeComponents/RecentLogs.vue';
-import ChartCard2 from '@/components/HomeComponents/ChartCard.vue';
+import ChartCard from '@/components/HomeComponents/CustomChart.vue';
 
 const stats = [
   { title: 'Stat 1', stat: 100 },
@@ -24,18 +24,24 @@ const mockLogs = [
     message: 'Failed to fetch user data.',
   },
 ];
+
+const mockChartData = { 
+  title: 'Logs by Type', 
+  data: [10, 20, 30, 40], 
+  labels: ['Info', 'Debug', 'Warning', 'Error'] 
+};
 </script>
 
 <template>
   <div class="grid-container">
-    <h1 class="title">Home</h1>
+    <!-- <h1 class="title">Home</h1> -->
     
     <div class="carousel-section">
       <CarouselStats :stats="stats" />
     </div>
     
     <div class="chart-section">
-      <ChartCard />
+      <ChartCard v-bind="mockChartData"/>
     </div>
     
     <div class="logs-section">
@@ -45,10 +51,14 @@ const mockLogs = [
 </template>
 
 <style scoped>
+body {
+  overflow: hidden;
+}
+
 .grid-container {
   display: grid;
   grid-template-columns: 1fr 1fr; /* Dos columnas de igual ancho */
-  grid-template-rows: auto 20vh 65vh; /* Título, carrusel, área inferior */
+  grid-template-rows: auto 20vh 50vh; /* Título, carrusel, área inferior */
   gap: 1rem;
   height: 10vh;
   padding: 1rem;

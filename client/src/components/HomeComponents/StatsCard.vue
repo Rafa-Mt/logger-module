@@ -27,7 +27,7 @@ defineProps({
 
     <template #content>
       <div class="card-stat">
-      {{ stat }}
+        {{ stat }}
       </div>
     </template>
 
@@ -51,7 +51,7 @@ defineProps({
 }
 
 .custom-card {
-  border: 2px solid #818181; /* Cambia el color y grosor del borde según sea necesario */
+  background-color: #2c3e50;
   border-radius: 8px; /* Opcional: redondear las esquinas */
 }
 </style>

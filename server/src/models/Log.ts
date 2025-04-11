@@ -61,7 +61,7 @@ export default class LogManager {
         `);
     }
 
-    public async create() {
+    public static async create() {
         if (!selected_db) 
             selected_db = await openDatabase('./static/db.sqlite');
 
@@ -87,7 +87,6 @@ export default class LogManager {
     }
     
     public async logRoute({ip, method, endpoint, body, params}: RouteLog) {
-
         const methodId = LogManager.methods.findIndex((logMethod) => logMethod === method) +1
         await this.db.run(
             'INSERT INTO route_log (ip, endpoint, method_id, body, params) VALUES (?, ?, ?, ?, ?);',
@@ -95,7 +94,13 @@ export default class LogManager {
         )
     }
 
-    
+    public async logCustom({type, message}: {type: LogType, message: string}) {
+        const typeId = LogManager.types.findIndex((logType) => logType === type) +1
+        await this.db.run(
+            'INSERT INTO custom_log (type_id, message) VALUES (?, ?);',
+            typeId, message
+        )
+    }
 
     public async getAllRouteLogs() {
         return this.db.all<RouteLog[]>(`
