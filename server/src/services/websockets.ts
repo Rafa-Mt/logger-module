@@ -6,7 +6,5 @@ export const create = (httpServer: HttpServer) => {
 
     socketServer.on("connection", (socket: WebSocket) => {
         socket.send("connected")
-
-        // * ...
     })
 }
