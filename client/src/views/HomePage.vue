@@ -2,7 +2,7 @@
 import CarouselStats from '@/components/HomeComponents/CarouselStats.vue';
 import RecentLogs from '@/components/HomeComponents/RecentLogs.vue';
 import ChartCard from '@/components/HomeComponents/CustomChart.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { socket } from '@/socket';
 
 const stats = ref<{title: string, stat: unknown}[]>([]);
@@ -12,24 +12,44 @@ socket.on('stats', (data) => {
   console.log('Received stats:', stats.value);
 }); 
 
-const mockLogs = [
-  {
-    type: 'INFO',
-    time: '2025-04-10 12:34:56',
-    message: 'User logged in successfully.',
-  },
-  {
-    type: 'ERROR',
-    time: '2025-04-10 12:35:10',
-    message: 'Failed to fetch user data.',
-  },
-];
+const mockLogs = ref<Array<{ id: number, message: string, timestamp: string, type: string }>>([]);
 
-const mockChartData = { 
-  title: 'Logs by Type', 
-  data: [10, 20, 30, 40], 
-  labels: ['Info', 'Debug', 'Warning', 'Error'] 
-};
+const chartData = ref({
+  title: 'Logs by Type',
+  data: [] as number[],
+  labels: [] as string[]
+});
+
+onMounted(async () => {
+  try {
+    const chartResponse = await fetch('http://localhost:4586/chart');
+    if (!chartResponse.ok) {
+      throw new Error('Error fetching chart data');
+    }
+    const chartResult = await chartResponse.json();
+    // Esperamos que el endpoint retorne: { types: [...], counts: [...] }
+    chartData.value = {
+      title: 'Logs by Type',
+      labels: chartResult.types,
+      data: chartResult.counts
+    };
+  } catch (error) {
+    console.error('Error fetching chart data:', error);
+  }
+
+  try {
+    const logsResponse = await fetch('http://localhost:4586/logs/custom');
+    if (!logsResponse.ok) {
+      throw new Error('Error fetching custom logs');
+    }
+    const logsResult = await logsResponse.json();
+    mockLogs.value = logsResult.customLogs;
+    console.log('Received custom logs:', mockLogs.value);
+    console.log('Received custom logs:', typeof(mockLogs.value[0]?.timestamp));
+  } catch (error) {
+    console.error('Error fetching custom logs:', error);
+  }
+});
 </script>
 
 <template>
@@ -41,7 +61,7 @@ const mockChartData = {
     </div>
     
     <div class="chart-section">
-      <ChartCard v-bind="mockChartData"/>
+      <ChartCard v-bind="chartData"/>
     </div>
     
     <div class="logs-section">

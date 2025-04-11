@@ -168,13 +168,33 @@ export class LoggerServer {
     }
 
     /**
+     * Registra un log de tipo INFO usando logCustom
+     */
+    public async info({message}: { message: string }) {
+        await this.logs.logCustom({ type: 'INFO', message: message });
+        console.log('INFO log registrado:', message);
+        // Envía el evento al front
+        this.io.emit('log', { message, type: 'INFO' });
+    }
+
+    /**
+     * Registra un log de tipo WARNING usando logCustom
+     */
+    public async warning({message}: { message: string }) {
+        await this.logs.logCustom({ type: 'WARNING', message: message });
+        console.log('WARNING log registrado:', message);
+        // Envía el evento al front
+        this.io.emit('log', { message, type: 'WARNING' });
+    }
+
+    /**
      * Registra un log de tipo ERROR usando logCustom
      */
-    public async error(log: { ip: string; endpoint: string; method: string; body?: any; params?: any }) {
-        await this.logs.logCustom({ type: 'ERROR', message: JSON.stringify(log) });
-        console.error('ERROR log registrado:', log);
+    public async error({message}: { message: string }) {
+        await this.logs.logCustom({ type: 'ERROR', message: message });
+        console.log('ERROR log registrado:', message);
         // Envía el evento al front
-        this.io.emit('log', { ...log, type: 'ERROR' });
+        this.io.emit('log', { message, type: 'ERROR' });
     }
 
     /**

@@ -8,11 +8,11 @@ const props = defineProps({
     type: Array,
     required: true,
     default: () => [],
-    validator: (value: Array<{ type: string; time: string; message: string }>) => {
+    validator: (value: Array<{ type: string; timestamp: string; message: string }>) => {
       return value.every(
         (item) =>
           typeof item.type === 'string' &&
-          typeof item.time === 'string' &&
+          typeof item.timestamp === 'string' &&
           typeof item.message === 'string'
       );
     },
@@ -20,6 +20,7 @@ const props = defineProps({
 });
   
   const limitedLogs = computed(() => props.logs.slice(0, 10));
+  console.log ("ddddddddddd",props.logs)
 </script>
 
 <template>
@@ -39,7 +40,7 @@ const props = defineProps({
     </Column>
     
     <!-- Columna Time - Ancho fijo mediano -->
-    <Column field="time" header="Time" headerStyle="width: 30%" bodyStyle="width: 150px">
+    <Column field="timestamp" header="Time" headerStyle="width: 30%" bodyStyle="width: 150px">
       <template #body="{data}">
         <span class="text-ellipsis" style="width: 150px; display: inline-block">
           {{ data.time }}
