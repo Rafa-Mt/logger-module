@@ -118,6 +118,7 @@ export default class LogManager {
                 log.endpoint,
                 log.body,
                 log.params,
+                log.timestamp,
                 http_method.name as method
             FROM route_log AS log
                 INNER JOIN http_method ON log.method_id = http_method.id

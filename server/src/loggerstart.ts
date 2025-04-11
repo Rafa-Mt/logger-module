@@ -8,7 +8,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import {CustomLog, RouteLog, HttpMethod} from '@/../../common/types.d'; 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { freemem } from 'os';
+import cors from 'cors';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,6 +23,7 @@ export class LoggerServer {
 
     constructor() {
         this.app = express();
+        this.app.use(cors({origin: '*'}));
         this.server = http.createServer(this.app);
         this.init();
     }
@@ -30,6 +31,7 @@ export class LoggerServer {
     private async init() {
         // Configuración del front (puerto 4596)
         const frontApp = express();
+        frontApp.use(cors({origin: '*'}));
         const frontPort = 4596;
 
         frontApp.use(express.static(path.join(__dirname, '../../client/dist')));

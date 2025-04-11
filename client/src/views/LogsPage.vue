@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import DataTable from 'primevue/datatable';
@@ -7,55 +7,46 @@ import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import {CustomLog, RouteLog} from '@/../../common/types'; 
+import { onMounted } from 'vue';
+import { socket } from '@/socket';
 
 
 // Datos de ejemplo
 type LogType = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-const customLogs = ref<CustomLog[]>([
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
-  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
-  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
-  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
-  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
-  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
-  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
-  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
-  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
-  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
-  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-  { type: 'ERROR', message: 'Error al conectar con la base de datos', timestamp: new Date(Date.now() - 3600000) },
-  { type: 'WARN', message: 'Espacio en disco bajo', timestamp: new Date(Date.now() - 7200000) },
-  { type: 'DEBUG', message: 'Proceso de limpieza ejecutado', timestamp: new Date(Date.now() - 10800000) },
-  { type: 'INFO', message: 'Sistema iniciado correctamente', timestamp: new Date() },
-]);
+const customLogs = ref<CustomLog[]>([]);
 
 
-const routeLogs = ref<RouteLog[]>([
-  { ip: '192.168.1.1', method: 'GET', endpoint: '/api/users', timestamp: new Date() },
-  { ip: '10.0.0.5', method: 'POST', endpoint: '/api/auth/login', body: { username: 'admin', password: '12345' },params: { page: 1, limit: 10 }, timestamp: new Date(Date.now() - 3600000) },
-]);
+const routeLogs = ref<RouteLog[]>([]);
 
 const searchQuery = ref('');
 const currentPage = ref(0);
 const rowsPerPage = ref(10);
 const activeTabIndex = ref(0);
+
+const get = async () => {
+  try {
+    const response = await fetch('http://localhost:4586/logs/');
+    const data = await response.json();
+    console.log(data);
+    customLogs.value = data.customLogs;
+    routeLogs.value = data.routeLogs;
+  }
+  catch (error) {
+    console.error('Error fetching logs:', error);
+  }
+}
+
+onMounted(() => {
+  get();
+  socket.on('custom-log', (data: CustomLog) => {
+    customLogs.value.push(data);
+  });
+  socket.on('route-log', (data: RouteLog) => {
+    routeLogs.value.push(data);
+  });
+});
 
 // Filtrado y paginación para Custom Logs
 const filteredCustomLogs = computed(() => {
@@ -219,7 +210,7 @@ const methods = ref<HttpMethod[]>(['GET', 'POST', 'PUT', 'DELETE']);
           </Column>
           <Column field="timestamp" header="Fecha/Hora">
             <template #body="{data}">
-              {{ data.timestamp.toLocaleString() }}
+              {{ data.timestamp }}
             </template>
           </Column>
         </DataTable>
@@ -242,7 +233,7 @@ const methods = ref<HttpMethod[]>(['GET', 'POST', 'PUT', 'DELETE']);
           <Column field="message" header="Mensaje" />
           <Column field="timestamp" header="Fecha/Hora" >
             <template #body="{data}">
-              {{ data.timestamp.toLocaleString() }}
+              {{ data.timestamp }}
             </template>
           </Column>
           
