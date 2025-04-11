@@ -17,8 +17,8 @@ defineProps({
 </script>
 
 <template>
-  <Card>
-    <!-- Título pequeño arriba a la derecha -->
+  <Card class="custom-card">
+
     <template #title>
       <div class="card-title">
         {{ title }}
@@ -37,7 +37,7 @@ defineProps({
 <style scoped>
 .card-title {
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 1.5rem;
   color: rgb(236, 219, 219);
 }
 
@@ -46,7 +46,12 @@ defineProps({
   justify-content: center;
   align-items: center;
   height: 100%;
-  font-size: 2rem;
+  font-size: 4rem;
   font-weight: bold;
+}
+
+.custom-card {
+  border: 2px solid #818181; /* Cambia el color y grosor del borde según sea necesario */
+  border-radius: 8px; /* Opcional: redondear las esquinas */
 }
 </style>

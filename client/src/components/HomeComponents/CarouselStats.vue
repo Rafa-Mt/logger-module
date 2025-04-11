@@ -16,7 +16,7 @@ defineProps({
 <template>
   <Carousel 
     :value="stats" 
-    :numVisible="3" 
+    :numVisible="4" 
     :numScroll="1" 
     :circular="true" 
     :showIndicators="false" 
@@ -30,6 +30,6 @@ defineProps({
 
 <style scoped>
 .carousel-stats ::v-deep(.p-carousel-item) {
-  padding: 0 10px; 
+  padding: 0 25px; 
 }
 </style>
